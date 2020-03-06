@@ -3,4 +3,5 @@ __pycache__/
 .vscode
 .ipynb_checkpoints
 .env
-data
+data/*
+!data/paper.pdf
