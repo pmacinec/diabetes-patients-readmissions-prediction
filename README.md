@@ -1,4 +1,4 @@
-# Diabetes Patients Readmissions Prediction
+# Diabetes Patients Early Readmissions Prediction
 
 **Authors:** Peter Macinec, Frantisek Sefcik
 
