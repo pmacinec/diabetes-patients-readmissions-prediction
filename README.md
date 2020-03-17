@@ -1,6 +1,6 @@
 # Diabetes Patients Early Readmissions Prediction
 
-**Authors:** Peter Macinec, Frantisek Sefcik
+**Authors:** [Peter Macinec](https://github.com/pmacinec), [Frantisek Sefcik](https://github.com/FrantisekSefcik)
 
 ## Installation and running
 
