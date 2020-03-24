@@ -242,6 +242,7 @@ class DiagnosesCodesMapper(TransformerMixin):
         self.columns = columns
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = [col for col in self.columns if col in df.columns]
         return self
 
     @staticmethod
@@ -337,6 +338,7 @@ class NumberMedicamentsChangesCreator(TransformerMixin):
         self.columns = columns
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = [col for col in self.columns if col in df.columns]
         return self
 
     @staticmethod
@@ -381,6 +383,7 @@ class NumberMedicamentsCreator(TransformerMixin):
         self.columns = columns
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = [col for col in self.columns if col in df.columns]
         return self
 
     @transformer_time_calculation_decorator('NumberMedicamentsCreator')
