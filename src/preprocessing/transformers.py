@@ -139,6 +139,35 @@ class OneHotEncoder(TransformerMixin):
         return df
 
 
+class ValueMapper(TransformerMixin):
+    """
+    Transformer to map values in column to corresponding value in the mapping.
+
+    :param mapping: dictionary with mapping.
+    """
+
+    def __init__(self, mapping={}):
+        self.mapping = mapping
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @transformer_time_calculation_decorator('ValueMapper')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+        for key in self.mapping.keys():
+            column_mapping = self.mapping[key]
+            df_copy[key] = df_copy[key].apply(
+                lambda x: self.get_value(x, column_mapping)
+            )
+        return df_copy
+
+    def get_value(self, value, mapping):
+        if pd.isna(value) or value not in mapping.keys():
+            return None
+        return mapping[value]
+
+
 class DiagnosesCodesMapper(TransformerMixin):
     """
     Transformer to map diagnoses codes to diagnoses.
