@@ -192,7 +192,7 @@ class ValueMapper(TransformerMixin):
 
         :param value: value to be found in mapping.
         :param mapping: provided mapping of values.
-        :return: mapped value or None, if valus is unknown or NaN.
+        :return: mapped value or None, if value is unknown or NaN.
         """
         if pd.isna(value) or value not in mapping.keys():
             return None
@@ -268,7 +268,7 @@ class SmallCategoriesReducer(TransformerMixin):
 
         :param value: value to be found in mapping.
         :param mapping: provided mapping of values.
-        :return: mapped value or None, if valus is unknown or NaN.
+        :return: mapped value or None, if value is unknown or NaN.
         """
         if pd.isna(value):
             return None
