@@ -1,6 +1,9 @@
+import numpy as np
+import pandas as pd
+import string
+from functools import reduce
 from sklearn.base import TransformerMixin
 from src.decoratos import transformer_time_calculation_decorator
-import pandas as pd
 
 class ColumnsFilter(TransformerMixin):
     """
@@ -123,3 +126,167 @@ class OneHotEncoder(TransformerMixin):
         for column in columns_to_add:
             df[column] = 0
         return df
+
+
+class DiagnosesCodesMapper(TransformerMixin):
+    """
+    Transformer to map diagnoses codes to diagnoses.
+
+    :param columns: columns with diagnose code.
+    """
+
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @staticmethod
+    def diagnosis_mapping():
+        """
+        Create code to diagnosis mappings.
+
+        :return: dictionary with mappings.
+        """
+        mapping = dict()
+        mapping['circulatory'] = list(range(390, 460)) + [785]
+        mapping['respiratory'] = list(range(460, 520)) + [786]
+        mapping['digestive'] = list(range(520, 580)) + [787]
+        mapping['diabetes'] = [250]
+        mapping['injury'] = list(range(800, 1000))
+        mapping['musculoskeletal'] = list(range(710, 740))
+        mapping['genitourinary'] = list(range(580, 630)) + [788]
+        mapping['neoplasm'] = list(range(140, 240))
+
+        all_codes = reduce(lambda x, y: x + mapping[y], mapping.keys(), [])
+        mapping['other'] = [x for x in range(1, 1000) if x not in all_codes]
+        mapping['other'] = mapping['other'] + list(string.ascii_uppercase)
+
+        for key in mapping.keys():
+            mapping[key] = [str(x) for x in mapping[key]]
+        return mapping
+
+    @staticmethod
+    def map_code_to_diagnose(code, mapping):
+        """
+        Map code to diagnose.
+
+        :param code: diagnose code.
+        :param mapping: code->diagnose mapping.
+        :return: diagnose according to given code.
+        """
+        code = str(code)
+        if not code:
+            return None
+        for diagnose in mapping.keys():
+            if diagnose in ['diabetes', 'other']:
+                if any([code.startswith(x) for x in mapping[diagnose]]):
+                    return diagnose
+                else:
+                    continue
+            if code in mapping[diagnose]:
+                return diagnose
+
+    @transformer_time_calculation_decorator('DiagnosesCodesMapper')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+
+        mapping = DiagnosesCodesMapper.diagnosis_mapping()
+
+        for column in self.columns:
+            df_copy[f'{column}_category'] = df_copy[column].apply(
+                lambda x: DiagnosesCodesMapper.map_code_to_diagnose(x, mapping)
+            )
+        df_copy = df_copy.drop(self.columns, axis=1)
+        return df_copy
+
+
+class NumberVisitsCreator(TransformerMixin):
+    """
+    Transformer to create number of visits feature.
+
+    :param columns: visits columns to sum.
+    """
+
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @transformer_time_calculation_decorator('NumberVisitsCreator')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+
+        df_copy['visits_sum'] = df_copy.loc[:, self.columns].sum(axis=1)
+
+        return df_copy
+
+
+class NumberMedicamentsChangesCreator(TransformerMixin):
+    """
+    Transformer to create number of medicaments changes feature.
+
+    :param columns: columns with medicaments.
+    """
+
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @staticmethod
+    def counter(counter_value, medicament):
+        """
+        Count medicament changes under medicament value condition.
+
+        :param counter_value: actual value of counter.
+        :param medicament: concrete medicament value.
+        :return: new value of counter (either incremented or not).
+        """
+        if medicament not in ['No', 'Steady']:
+            return counter_value + 1
+        return counter_value
+
+    @transformer_time_calculation_decorator('NumberMedicamentsChangesCreator')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+        col_name = 'number_medicaments_changes'
+
+        df_copy[col_name] = 0
+
+        for medicament in self.columns:
+            df_copy[col_name] = df_copy.apply(
+                lambda x: NumberMedicamentsChangesCreator.counter(
+                    x[col_name], x[medicament]
+                ),
+                axis=1
+            )
+
+        return df_copy
+
+
+class NumberMedicamentsCreator(TransformerMixin):
+    """
+    Transformer to create number of medicaments feature.
+
+    :param columns: columns with medicaments.
+    """
+
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @transformer_time_calculation_decorator('NumberMedicamentsCreator')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+        col_name = 'number_medicaments'
+
+        df_copy[col_name] = df_copy[self.columns].apply(
+            lambda y: y.apply(lambda x: np.sum(0 if x == 'No' else 1)), axis=1
+        ).apply(np.sum, axis=1)
+
+        return df_copy
