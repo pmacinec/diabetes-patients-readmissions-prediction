@@ -63,3 +63,29 @@ class ColumnsNanFilter(TransformerMixin):
     def transform(self, df, **transform_params):
         df = df.drop(self.columns, axis=1)
         return df
+
+
+class ColumnsValuesDiversityFilter(TransformerMixin):
+    """
+    Transformer to drop columns of the dataframe with small diversity of
+    values for feature.
+
+    :param threshold: ratio of the most frequented value.
+    """
+
+    def __init__(self, threshold=1):
+        self.columns = []
+        self.threshold = threshold
+
+    def fit(self, df, y=None, **fit_params):
+        for column in df.columns:
+            values = df[column].value_counts()
+            threshold = values.max() / values.sum()
+            if threshold >= self.threshold:
+                self.columns.append(column)
+        return self
+
+    @transformer_time_calculation_decorator('ColumnsValuesDiversityFilter')
+    def transform(self, df, **transform_params):
+        df = df.drop(self.columns, axis=1)
+        return df
