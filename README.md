@@ -6,13 +6,13 @@
 
 To run this project, please make sure you have Docker installed. After, follow the steps:
 1. Get into project root repository.
-1. Build docker image:
+1. Build application using docker:
     ```
-    docker build -t dprp_image .
+    ./scripts/build.sh
     ```
 1. Run docker container using command: 
     ```
-    docker run -it --name dprp_con --rm -p 8888:8888 -v $(pwd):/project/ dprp_image
+    ./scripts/run.sh
     ```
 
 Do not forget to add dataset into `data` folder. Remember that csv file must be named `data.csv`.
