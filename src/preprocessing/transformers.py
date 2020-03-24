@@ -42,19 +42,18 @@ class RowsFilter(TransformerMixin):
 
 class ColumnsNanFilter(TransformerMixin):
     """
-    Transformer to drop columns of the dataframe with higher range of nan values.
+    Transformer to drop columns of the dataframe with higher range of
+    nan values.
 
-    :param indices: list of indices of samples to drop.
+    :param threshold: threshold range of nan values.
     """
 
-    def __init__(self, threshold=0.6, columns=None):
-        self.columns = columns
+    def __init__(self, threshold=0.6):
         self.threshold = threshold
+        self.columns = []
 
     def fit(self, df, y=None, **fit_params):
-        all_columns = self.columns if self.columns else df.columns
-        self.columns = []
-        for column in all_columns:
+        for column in df.columns:
             threshold = df[column].isna().sum() / df[column].shape[0]
             if threshold > self.threshold:
                 self.columns.append(column)
