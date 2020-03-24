@@ -330,3 +330,34 @@ class NumberMedicamentsCreator(TransformerMixin):
         ).apply(np.sum, axis=1)
 
         return df_copy
+
+
+class MissingValuesImputer(TransformerMixin):
+    """
+    Transformer to fill nan values.
+
+    :param columns: list of columns to replace nan.
+    :param strategy: one of defined strategies (mean, most_frequent)
+    """
+
+    def __init__(self, columns, strategy):
+        self.columns = columns
+        self.strategy = strategy
+        self.mapping = {}
+
+    def fit(self, df, y=None, **fit_params):
+        for column in self.columns:
+            if self.strategy == 'mean':
+                self.mapping[column] = df[column].mean()
+            elif self.strategy == 'median':
+                self.mapping[column] = df[column].median()
+            elif self.strategy == 'most_frequent':
+                self.mapping[column] = df[column].mode()[0]
+        return self
+
+    @transformer_time_calculation_decorator('ValueMapper')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+        for column in self.columns:
+            df_copy[column] = df_copy[column].fillna(self.mapping[column])
+        return df_copy
