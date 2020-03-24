@@ -5,6 +5,7 @@ from functools import reduce
 from sklearn.base import TransformerMixin
 from src.decoratos import transformer_time_calculation_decorator
 
+
 class ColumnsFilter(TransformerMixin):
     """
     Transformer to drop columns of the dataframe.
@@ -70,8 +71,8 @@ class ColumnsNanFilter(TransformerMixin):
 
 class ColumnsValuesDiversityFilter(TransformerMixin):
     """
-    Transformer to drop columns of the dataframe with small diversity of
-    values for feature.
+    Transformer to drop columns of the dataframe with small diversity
+    of values for feature.
 
     :param threshold: ratio of the most frequented value.
     """
@@ -96,32 +97,42 @@ class ColumnsValuesDiversityFilter(TransformerMixin):
 
 class OneHotEncoder(TransformerMixin):
     """
-    Transformer to create one hot encoding.
+    Transformer to one-hot encode categorical attributes.
 
     :param columns: list of columns to by encoded.
     """
 
-    def __init__(self, columns=[]):
+    def __init__(self, columns):
         self.columns = columns
         self.categories = {}
 
     def fit(self, df, y=None, **fit_params):
         for column in self.columns:
             self.categories[column] = set([
-                str(column) + '_' + str(val) for val in df[column].unique()
+                f'{str(column)}_{str(val)}' for val in df[column].unique()
             ])
         return self
 
     @transformer_time_calculation_decorator('OneHotEncoder')
     def transform(self, df, **transform_params):
+        df_copy = df.copy()
         for column in self.columns:
-            df = pd.concat([df, pd.get_dummies(df[column], prefix=column)],
-                           axis=1)
-            df = self.add_missing_columns(df, column)
-        df = df.drop(self.columns, axis=1)
-        return df
+            df_copy = pd.concat(
+                [df_copy, pd.get_dummies(df_copy[column], prefix=column)],
+                axis=1
+            )
+            df_copy = self.add_missing_encoded_columns(df_copy, column)
+        df_copy.drop(self.columns, axis=1, inplace=True)
+        return df_copy
 
-    def add_missing_columns(self, df, column):
+    def add_missing_encoded_columns(self, df, column):
+        """
+        Add missing categorical encoded columns to dataframe.
+
+        :param df: dataframe to add columns into.
+        :param column: column
+        :return: new dataframe with added missing columns.
+        """
         columns_to_add = self.categories[column] - set(df.columns)
         for column in columns_to_add:
             df[column] = 0
