@@ -1,6 +1,6 @@
 from sklearn.base import TransformerMixin
 from src.decoratos import transformer_time_calculation_decorator
-
+import pandas as pd
 
 class ColumnsFilter(TransformerMixin):
     """
@@ -87,5 +87,27 @@ class ColumnsValuesDiversityFilter(TransformerMixin):
 
     @transformer_time_calculation_decorator('ColumnsValuesDiversityFilter')
     def transform(self, df, **transform_params):
+        df = df.drop(self.columns, axis=1)
+        return df
+
+
+class OneHotEncoder(TransformerMixin):
+    """
+    Transformer to create one hot encoding.
+
+    :param columns: list of columns to by encoded.
+    """
+
+    def __init__(self, columns=[]):
+        self.columns = columns
+
+    def fit(self, df, y=None, **fit_params):
+        return self
+
+    @transformer_time_calculation_decorator('OneHotEncoder')
+    def transform(self, df, **transform_params):
+        for column in self.columns:
+            df = pd.concat([df, pd.get_dummies(df[column], prefix=column)],
+                           axis=1)
         df = df.drop(self.columns, axis=1)
         return df
