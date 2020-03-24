@@ -100,8 +100,13 @@ class OneHotEncoder(TransformerMixin):
 
     def __init__(self, columns=[]):
         self.columns = columns
+        self.categories = {}
 
     def fit(self, df, y=None, **fit_params):
+        for column in self.columns:
+            self.categories[column] = set([
+                str(column) + '_' + str(val) for val in df[column].unique()
+            ])
         return self
 
     @transformer_time_calculation_decorator('OneHotEncoder')
@@ -109,5 +114,12 @@ class OneHotEncoder(TransformerMixin):
         for column in self.columns:
             df = pd.concat([df, pd.get_dummies(df[column], prefix=column)],
                            axis=1)
+            df = self.add_missing_columns(df, column)
         df = df.drop(self.columns, axis=1)
+        return df
+
+    def add_missing_columns(self, df, column):
+        columns_to_add = self.categories[column] - set(df.columns)
+        for column in columns_to_add:
+            df[column] = 0
         return df
