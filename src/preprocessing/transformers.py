@@ -44,6 +44,28 @@ class RowsFilter(TransformerMixin):
         return df
 
 
+class RowsNanFilter(TransformerMixin):
+    """
+    Transformer to drop rows of dataframe with too many missing values.
+
+    :param threshold: decimal threshold (percentage scaled to 0-1) of
+        missing values in row to be dropped.
+    """
+
+    def __init__(self, threshold=0.3):
+        self.threshold = threshold
+        self.num_non_nan = None
+
+    def fit(self, df, y=None, **fit_params):
+        self.num_non_nan = round(df.shape[1] * (1 - self.threshold))
+        return self
+
+    @transformer_time_calculation_decorator('RowsNanFilter')
+    def transform(self, df, **transform_params):
+        df = df.dropna(thresh=self.num_non_nan)
+        return df
+
+
 class ColumnsNanFilter(TransformerMixin):
     """
     Transformer to drop columns of the dataframe with higher range of
