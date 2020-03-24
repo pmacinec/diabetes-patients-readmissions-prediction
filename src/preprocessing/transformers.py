@@ -231,6 +231,52 @@ class MissingValuesImputer(TransformerMixin):
         return df_copy
 
 
+class SmallCategoriesReducer(TransformerMixin):
+    """
+    Transformer to merge small classes to one.
+
+    :param columns: list of columns to reduce categories.
+    :param replace_value: name of category to replace small categories.
+    """
+
+    def __init__(self, columns, threshold=0.05, replace_value='other'):
+        self.columns = columns
+        self.replace_value = replace_value
+        self.threshold = threshold
+        self.mapping = {}
+
+    def fit(self, df, y=None, **fit_params):
+        for column in self.columns:
+            values = df[column].value_counts(normalize=True)
+            for name, value in values.iteritems():
+                if value < self.threshold:
+                    self.mapping[name] = self.replace_value
+        return self
+
+    @transformer_time_calculation_decorator('SmallCategoriesReducer')
+    def transform(self, df, **transform_params):
+        for column in self.columns:
+            df[column] = df[column].apply(
+                lambda x: SmallCategoriesReducer.get_value(x, self.mapping)
+            )
+        return df
+
+    @staticmethod
+    def get_value(value, mapping):
+        """
+        Get value from mapping with handling special cases.
+
+        :param value: value to be found in mapping.
+        :param mapping: provided mapping of values.
+        :return: mapped value or None, if valus is unknown or NaN.
+        """
+        if pd.isna(value):
+            return None
+        if value not in mapping.keys():
+            return value
+        return mapping[value]
+
+
 class DiagnosesCodesMapper(TransformerMixin):
     """
     Transformer to map diagnoses codes to diagnoses.
