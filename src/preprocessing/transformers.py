@@ -163,7 +163,8 @@ class OneHotEncoder(TransformerMixin):
 
 class ValueMapper(TransformerMixin):
     """
-    Transformer to map values in column to corresponding value in the mapping.
+    Transformer to map values in column to corresponding values in
+    the mapping.
 
     :param mapping: dictionary with mapping.
     """
@@ -180,14 +181,54 @@ class ValueMapper(TransformerMixin):
         for key in self.mapping.keys():
             column_mapping = self.mapping[key]
             df_copy[key] = df_copy[key].apply(
-                lambda x: self.get_value(x, column_mapping)
+                lambda x: ValueMapper.get_value(x, column_mapping)
             )
         return df_copy
 
-    def get_value(self, value, mapping):
+    @staticmethod
+    def get_value(value, mapping):
+        """
+        Get value from mapping with handling special cases.
+
+        :param value: value to be found in mapping.
+        :param mapping: provided mapping of values.
+        :return: mapped value or None, if valus is unknown or NaN.
+        """
         if pd.isna(value) or value not in mapping.keys():
             return None
         return mapping[value]
+
+
+class MissingValuesImputer(TransformerMixin):
+    """
+    Transformer to fill NaN values.
+
+    :param columns: list of columns to replace NaN.
+    :param strategy: one of defined strategies (mean, median or
+        most_frequent).
+    """
+
+    def __init__(self, columns, strategy):
+        self.columns = columns
+        self.strategy = strategy
+        self.mapping = {}
+
+    def fit(self, df, y=None, **fit_params):
+        for column in self.columns:
+            if self.strategy == 'mean':
+                self.mapping[column] = df[column].mean()
+            elif self.strategy == 'median':
+                self.mapping[column] = df[column].median()
+            elif self.strategy == 'most_frequent':
+                self.mapping[column] = df[column].mode()[0]
+        return self
+
+    @transformer_time_calculation_decorator('MissingValuesImputer')
+    def transform(self, df, **transform_params):
+        df_copy = df.copy()
+        for column in self.columns:
+            df_copy[column] = df_copy[column].fillna(self.mapping[column])
+        return df_copy
 
 
 class DiagnosesCodesMapper(TransformerMixin):
@@ -351,35 +392,4 @@ class NumberMedicamentsCreator(TransformerMixin):
             lambda y: y.apply(lambda x: np.sum(0 if x == 'No' else 1)), axis=1
         ).apply(np.sum, axis=1)
 
-        return df_copy
-
-
-class MissingValuesImputer(TransformerMixin):
-    """
-    Transformer to fill nan values.
-
-    :param columns: list of columns to replace nan.
-    :param strategy: one of defined strategies (mean, most_frequent)
-    """
-
-    def __init__(self, columns, strategy):
-        self.columns = columns
-        self.strategy = strategy
-        self.mapping = {}
-
-    def fit(self, df, y=None, **fit_params):
-        for column in self.columns:
-            if self.strategy == 'mean':
-                self.mapping[column] = df[column].mean()
-            elif self.strategy == 'median':
-                self.mapping[column] = df[column].median()
-            elif self.strategy == 'most_frequent':
-                self.mapping[column] = df[column].mode()[0]
-        return self
-
-    @transformer_time_calculation_decorator('ValueMapper')
-    def transform(self, df, **transform_params):
-        df_copy = df.copy()
-        for column in self.columns:
-            df_copy[column] = df_copy[column].fillna(self.mapping[column])
         return df_copy
