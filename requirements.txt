@@ -1,2 +1,2 @@
-missingno
-imblearn
+missingno==0.4.2
+imbalanced-learn==0.6.2
