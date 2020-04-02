@@ -74,7 +74,7 @@ class ColumnsNanFilter(TransformerMixin):
     :param threshold: threshold range of nan values.
     """
 
-    def __init__(self, threshold=0.6):
+    def __init__(self, threshold=0.45):
         self.threshold = threshold
         self.columns = []
 
