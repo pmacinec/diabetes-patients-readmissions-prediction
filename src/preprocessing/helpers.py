@@ -1,4 +1,27 @@
+import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
+
+
+def load_dataset():
+    """
+    Load dataset with custom data types.
+    
+    :return: loaded dataframe.
+    """
+    # Only needed changes in data types are listed
+    data_types = {
+        'admission_type_id': object,
+        'discharge_disposition_id': object,
+        'admission_source_id': object
+    }
+
+    return pd.read_csv(
+        '../data/data.csv',
+        na_values='?',
+        low_memory=False,
+        dtype=data_types
+    )
 
 
 def split_dataframe(x, y, test_size=0.2):
