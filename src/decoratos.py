@@ -11,7 +11,6 @@ def transformer_time_calculation_decorator(transformer_name: str):
     def decorator(function):
         def wrapper(*args, **kwargs):
             start_time = time.time()
-            print(f'{transformer_name} transformation started.')
 
             result = function(*args, **kwargs)
 
