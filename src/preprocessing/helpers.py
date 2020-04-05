@@ -49,3 +49,17 @@ def transform_label(y):
     :return: dataframe with transformed label.
     """
     return y.apply(lambda x: 1 if x == '<30' else 0)
+
+
+def describe_dataset(X_train, X_test, y_train, y_test):
+    print("Number of train data: ", X_train.shape[0])
+    print("Number of test data:  ", X_test.shape[0])
+    categories = y_train['0'].unique()
+    columns = X_train.columns.shape[0]
+    print("With ", columns, " features.")
+    print("In ", categories.shape[0], " classes:")
+    for c in categories:
+        num = (y_train['0'] == c).sum()
+        print('              ', str(c), ': ', num,
+              ' samples, ', f'{num / y_train["0"].shape[0]:.2f}%')
+
