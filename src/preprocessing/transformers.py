@@ -74,7 +74,7 @@ class ColumnsFilter(TransformerMixin):
 
     @transformer_time_calculation_decorator('ColumnsFilter')
     def transform(self, df, **transform_params):
-        df = df.drop(self.columns, axis=1)
+        df = df.drop(self.columns, axis=1, errors='ignore')
         return df
 
 
@@ -101,8 +101,8 @@ class RowsNanFilter(TransformerMixin):
     """
     Transformer to drop rows of dataframe with too many missing values.
 
-    :param threshold: decimal threshold (percentage scaled to 0-1) of
-        missing values in row to be dropped.
+    :param threshold: (default: 0.3) decimal threshold (percentage 
+        scaled to 0-1) of missing values in row to be dropped.
     """
 
     def __init__(self, threshold=0.3):
@@ -121,10 +121,10 @@ class RowsNanFilter(TransformerMixin):
 
 class ColumnsNanFilter(TransformerMixin):
     """
-    Transformer to drop columns of the dataframe with higher range of
+    Transformer to drop columns of the dataframe with higher range of 
     nan values.
 
-    :param threshold: threshold range of nan values.
+    :param threshold: (default: 0.45) threshold range of nan values.
     """
 
     def __init__(self, threshold=0.45):
@@ -149,7 +149,7 @@ class ColumnsValuesDiversityFilter(TransformerMixin):
     Transformer to drop columns of the dataframe with small diversity
     of values for feature.
 
-    :param threshold: ratio of the most frequented value.
+    :param threshold: (default: 1) ratio of the most frequented value.
     """
 
     def __init__(self, threshold=1):
@@ -174,14 +174,17 @@ class OneHotEncoder(TransformerMixin):
     """
     Transformer to one-hot encode categorical attributes.
 
-    :param columns: list of columns to by encoded.
+    :param columns: (default: None) list of columns to by encoded, 
+        if not passed then all columns of dataframe are used.
     """
 
-    def __init__(self, columns):
+    def __init__(self, columns=None):
         self.columns = columns
         self.categories = {}
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = self.columns if self.columns is not None else df.columns
+
         for column in self.columns:
             self.categories[column] = set([
                 f'{str(column)}_{str(val)}' for val in df[column].unique()
@@ -256,17 +259,20 @@ class MissingValuesImputer(TransformerMixin):
     """
     Transformer to fill NaN values.
 
-    :param columns: list of columns to replace NaN.
     :param strategy: one of defined strategies (mean, median or
         most_frequent).
+    :param columns: (default: None) list of columns to replace NaN, 
+        if not passed then all columns of dataframe are used.
     """
 
-    def __init__(self, columns, strategy):
+    def __init__(self, strategy, columns=None):
         self.columns = columns
         self.strategy = strategy
         self.mapping = {}
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = self.columns if self.columns is not None else df.columns
+
         for column in self.columns:
             if self.strategy == 'mean':
                 self.mapping[column] = df[column].mean()
@@ -288,17 +294,24 @@ class SmallCategoriesReducer(TransformerMixin):
     """
     Transformer to merge small classes to one.
 
-    :param columns: list of columns to reduce categories.
-    :param replace_value: name of category to replace small categories.
+    :param columns: (default: None) list of columns to merge small 
+        categories of, if not passed then all columns of dataframe 
+        are used.
+    :param replace_value: (default: other) name of category to replace 
+        small categories.
+    :param threshold: (default: 0.05) frequency threshold when small 
+        category will be merged into one `other` category.
     """
 
-    def __init__(self, columns, threshold=0.05, replace_value='other'):
+    def __init__(self, columns=None, threshold=0.05, replace_value='other'):
         self.columns = columns
         self.replace_value = replace_value
         self.threshold = threshold
         self.mapping = {}
 
     def fit(self, df, y=None, **fit_params):
+        self.columns = self.columns if self.columns is not None else df.columns
+
         for column in self.columns:
             values = df[column].value_counts(normalize=True)
             for name, value in values.iteritems():
