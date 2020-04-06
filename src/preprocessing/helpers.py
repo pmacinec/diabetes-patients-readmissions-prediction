@@ -52,6 +52,14 @@ def transform_label(y):
 
 
 def describe_dataset(X_train, X_test, y_train, y_test):
+    """
+    Desrcribe dataset.
+
+    :param X_train: dataframe with train data.
+    :param X_test: dataframe with test data.
+    :param y_train: dataframe with train labels.
+    :param y_train: dataframe with test labels.
+    """
     print("Number of train data: ", X_train.shape[0])
     print("Number of test data:  ", X_test.shape[0])
     categories = y_train['0'].unique()
