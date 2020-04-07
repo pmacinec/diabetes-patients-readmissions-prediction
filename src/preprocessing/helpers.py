@@ -62,12 +62,12 @@ def describe_dataset(X_train, X_test, y_train, y_test):
     """
     print("Number of train data: ", X_train.shape[0])
     print("Number of test data:  ", X_test.shape[0])
-    categories = y_train['0'].unique()
+    categories = y_train['label'].unique()
     columns = X_train.columns.shape[0]
     print("With ", columns, " features.")
     print("In ", categories.shape[0], " classes:")
     for c in categories:
-        num = (y_train['0'] == c).sum()
+        num = (y_train['label'] == c).sum()
         print('              ', str(c), ': ', num,
-              ' samples, ', f'{num / y_train["0"].shape[0]:.2f}%')
+              ' samples, ', f'{num / y_train["label"].shape[0]:.2f}%')
 
