@@ -1,24 +1,27 @@
+import matplotlib.pyplot as plt
+import numpy as np
 from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
+from imblearn.under_sampling import NearMiss
 from sklearn.metrics import accuracy_score, precision_score,\
     recall_score, roc_auc_score, f1_score, classification_report,\
     roc_curve, auc
 from sklearn.metrics import plot_confusion_matrix
-import matplotlib.pyplot as plt
-import numpy as np
 
 
 def undersample(x, y):
     """
-    Perform undersampling by randomly choosing samples.
+    Perform undersampling using NearMiss method.
+
+    More details about NearMiss method can be found at imblearn docs:
+    https://imbalanced-learn.readthedocs.io/en/stable/user_guide.html
 
     :param x: dataframe with attributes for training (independent
         variables).
     :param y: dataframe with label attribute (dependent variable).
     :return: x and y after undersampling performed.
     """
-    rus = RandomUnderSampler(random_state=42)
-    return rus.fit_resample(x, y)
+    nearmiss = NearMiss(version=3)
+    return nearmiss.fit_resample(x, y)
 
 
 def oversample(x, y):
