@@ -36,62 +36,65 @@ def oversample(x, y):
 
 def compare_models(models, names, x, y):
     """
-        Draw table with model and their performance.
+    Draw table with model and their performance.
 
-        :param models: list of trained models.
-        :param names: list of names of models.
-        :param x: dataframe with data for prediction.
-        :param y: dataframe with expected labels.
+    :param models: list of trained models.
+    :param names: list of names of models.
+    :param x: dataframe with data for prediction.
+    :param y: dataframe with expected labels.
     """
-    maxlen = np.max([len(x) for x in names])
-    print("      ".ljust(maxlen) +
-        "     Accuracy   F1 (micro)   F1 (macro)   Precission    Recall    AUC ROC")
+    max_len = np.max([len(x) for x in names])
+    print("      ".ljust(max_len) + "     Accuracy   F1 (micro)   F1 (macro)"
+                                    "   Precission    Recall    AUC ROC")
     for i, model in enumerate(models):
         y_pred = model.predict(x)
-        print(f"{names[i]}" + "".ljust(maxlen-len(names[i])) + f": "
+        print(f"{names[i]}" + "".ljust(max_len-len(names[i])) + f": "
               f"|   {accuracy_score(y, y_pred):.2f}   "
-              f"|    {f1_score(y, y_pred, average='micro'):.2f}    "
-              f"|    {f1_score(y, y_pred, average='macro'):.2f}    "
-              f"|    {precision_score(y, y_pred):.2f}    "
+              f"|   {f1_score(y, y_pred, average='micro'):.2f}    "
+              f"|   {f1_score(y, y_pred, average='macro'):.2f}    "
+              f"|   {precision_score(y, y_pred):.2f}    "
               f"|   {recall_score(y, y_pred):.2f}   "
               f"|   {roc_auc_score(y, y_pred):.2f}   |")
 
 
 def evaluate_model(model, x, y):
     """
-        Print evaluation of model.
+    Print evaluation of model.
 
-        :param model: model to be evaluated.
-        :param x: dataframe with data for prediction.
-        :param y: dataframe with expected labels.
+    :param model: model to be evaluated.
+    :param x: dataframe with data for prediction.
+    :param y: dataframe with expected labels.
     """
     y_pred = model.predict(x)
-    plot_confusion_matrix(model, x, y,
-                          cmap=plt.cm.Blues, normalize='true')
-
+    plot_confusion_matrix(
+        model, x, y, cmap=plt.cm.Blues, normalize='true'
+    )
     print(classification_report(y, y_pred))
-    print(f'ROC AUC score: {roc_auc_score(y, y_pred):.2f}')
+    print(f'ROC AUC score: {round(roc_auc_score(y, y_pred), 2)}')
 
 
-def roc_auc(pred, y, plot=True, label="curve"):
+def roc_auc(y_pred, y_true, plot=True, label="curve"):
     """
-        Draw roc curve plot.
+    Draw ROC curve plot.
 
-        :param pred: predicted labels.
-        :param y: expected labels.
-        :param plot: if True roc curve plot is draw.
-        :param label: label of a plot.
-        :return: roc auc score.
-        """
-    prob = pred/pred.max()
-    fpr, tpr, threshold = roc_curve(y, prob, drop_intermediate=True)
+    :param y_pred: predicted labels.
+    :param y_true: true labels.
+    :param plot: if True, ROC curve plot is drawn.
+    :param label: label of a plot.
+    :return: ROC AUC score.
+    """
+    prob = y_pred / y_pred.max()
+    fpr, tpr, _ = roc_curve(y_true, prob, drop_intermediate=True)
     auc_value = auc(fpr, tpr)
 
     if plot:
         plt.scatter(x=fpr, y=tpr, color='navy')
-        rcolor = tuple(np.random.rand(3,1)[:,0])
-        plt.plot(fpr, tpr, c=rcolor, lw=2, label=label +
-                                                 ' (AUC = %0.3f)' % auc_value)
+        plt.plot(
+            fpr, tpr,
+            c=tuple(np.random.rand(3, 1)[:, 0]),
+            lw=2,
+            label=f'{label} (AUC = {round(auc_value, 3)})'
+        )
         plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
