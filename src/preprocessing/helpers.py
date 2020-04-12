@@ -58,16 +58,20 @@ def describe_dataset(X_train, X_test, y_train, y_test):
     :param X_train: dataframe with train data.
     :param X_test: dataframe with test data.
     :param y_train: dataframe with train labels.
-    :param y_train: dataframe with test labels.
+    :param y_test: dataframe with test labels.
     """
-    print("Number of train data: ", X_train.shape[0])
-    print("Number of test data:  ", X_test.shape[0])
-    categories = y_train['label'].unique()
-    columns = X_train.columns.shape[0]
-    print("With ", columns, " features.")
-    print("In ", categories.shape[0], " classes:")
+    print(f'Number of train data: {X_train.shape[0]}')
+    print(f'Number of test data: {X_test.shape[0]}')
+    print(f'Number of features: {X_train.columns.shape[0]}')
+
+    categories = y_train['readmitted'].unique()
+    print(f'Classes:')
     for c in categories:
-        num = (y_train['label'] == c).sum()
-        print('              ', str(c), ': ', num,
-              ' samples, ', f'{num / y_train["label"].shape[0]:.2f}%')
+        num_train = (y_train['readmitted'] == c).sum()
+        num_test = (y_test['readmitted'] == c).sum()
+        print(f'\t{c} :\n'
+              f'\t    train: {num_train} samples, '
+              f'{round(num_train / X_train.shape[0], 2) * 100}%\n'
+              f'\t    test: {num_test} samples, '
+              f'{round(num_test / X_test.shape[0], 2) * 100}%\n')
 
