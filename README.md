@@ -6,14 +6,11 @@
 
 To run this project, please make sure you have Docker installed. After, follow the steps:
 1. Get into project root repository.
-1. Build application using docker:
+1. Build application using docker and start container:
     ```
-    ./scripts/build.sh
+    ./scripts/run.sh -b
     ```
-1. Run docker container using command: 
-    ```
-    ./scripts/run.sh
-    ```
+    **Note:** Next time, when no build is needed (because image has been already built), you can just run container by skipping `-b` argument.
 
 Do not forget to add dataset into `data` folder. Remember that csv file must be named `data.csv`.
 
