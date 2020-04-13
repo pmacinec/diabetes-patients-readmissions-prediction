@@ -112,12 +112,12 @@ def roc_auc(y_pred, y_true, plot=True, label="curve"):
 
 def plot_feature_importance(importance, feature_names):
     """
-        Plot features sorted by importance.
+    Plot features sorted by importance.
 
-        :param importance: importance of features.
-        :param feature_names: names of features.
-        :return: feature names sorted by importance.
-        """
+    :param importance: importance of features.
+    :param feature_names: names of features.
+    :return: feature names sorted by importance.
+    """
     indexes = np.argsort(importance)
     names = []
     feature_importance = []
