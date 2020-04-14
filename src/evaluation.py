@@ -69,14 +69,18 @@ def evaluate_model(model, x, y):
     :param y: dataframe with expected labels.
     """
     y_pred = model.predict(x)
+
+    fig, axs = plt.subplots(nrows=1, ncols=2,
+                            figsize=(12, 4), constrained_layout=True)
     plot_confusion_matrix(
-        model, x, y, cmap=plt.cm.Blues, normalize='true'
+        model, x, y, cmap=plt.cm.Blues, normalize='true', ax=axs[0]
     )
+    roc_auc(y_pred, y, ax=axs[1])
     print(classification_report(y, y_pred))
     print(f'ROC AUC score: {round(roc_auc_score(y, y_pred), 2)}')
 
 
-def roc_auc(y_pred, y_true, plot=True, label="curve"):
+def roc_auc(y_pred, y_true, plot=True, label="curve", ax=None):
     """
     Draw ROC curve plot.
 
@@ -84,6 +88,7 @@ def roc_auc(y_pred, y_true, plot=True, label="curve"):
     :param y_true: true labels.
     :param plot: if True, ROC curve plot is drawn.
     :param label: label of a plot.
+    :param ax: optional axis for plot.
     :return: ROC AUC score.
     """
     prob = y_pred / y_pred.max()
@@ -91,21 +96,22 @@ def roc_auc(y_pred, y_true, plot=True, label="curve"):
     auc_value = auc(fpr, tpr)
 
     if plot:
-        plt.scatter(x=fpr, y=tpr, color='navy')
-        plt.plot(
+        if not ax:
+            fig, ax = plt.subplots()
+        ax.scatter(x=fpr, y=tpr, color='navy')
+        ax.plot(
             fpr, tpr,
             c=tuple(np.random.rand(3, 1)[:, 0]),
             lw=2,
             label=f'{label} (AUC = {round(auc_value, 3)})'
         )
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('ROC Curve')
-        plt.legend(loc="lower right")
-        plt.show()
+        ax.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Positive Rate')
+        ax.set_title('ROC Curve')
+        ax.legend(loc="lower right")
 
     return auc_value
 
