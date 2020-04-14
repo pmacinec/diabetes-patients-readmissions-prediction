@@ -116,22 +116,23 @@ def roc_auc(y_pred, y_true, plot=True, label="curve", ax=None):
     return auc_value
 
 
-def plot_feature_importance(importance, feature_names):
+def plot_feature_importance(importance, feature_names, max_num=-1):
     """
     Plot features sorted by importance.
 
     :param importance: importance of features.
     :param feature_names: names of features.
+    :param max_num: maximal number of features to show.
     :return: feature names sorted by importance.
     """
     indexes = np.argsort(importance)
     names = []
     feature_importance = []
-    for i in indexes:
+    for i in indexes[:max_num]:
         names.append(feature_names[i])
         feature_importance.append(importance[i])
 
-    plt.figure(figsize=(10, len(feature_names) // 2))
+    plt.figure(figsize=(10, len(feature_names[:max_num]) // 2))
     plt.barh(names, feature_importance)
     plt.yticklabels = names
 
