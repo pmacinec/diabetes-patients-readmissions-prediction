@@ -47,11 +47,11 @@ def compare_models(models, names, x, y):
     :param y: dataframe with expected labels.
     """
     max_len = np.max([len(x) for x in names])
-    print("      ".ljust(max_len) + "     Accuracy   F1 (micro)   F1 (macro)"
-                                    "   Precission    Recall    AUC ROC")
+    print("      ".ljust(max_len) + "     Accuracy   F1 (micro)  F1 (macro)"
+                                    "  Precission   Recall   AUC ROC")
     for i, model in enumerate(models):
         y_pred = model.predict(x)
-        print(f"{names[i]}" + "".ljust(max_len-len(names[i])) + f": "
+        print(f"{names[i]}" + "".ljust(max_len-len(names[i])) + "   "
               f"|   {accuracy_score(y, y_pred):.2f}   "
               f"|   {f1_score(y, y_pred, average='micro'):.2f}    "
               f"|   {f1_score(y, y_pred, average='macro'):.2f}    "
