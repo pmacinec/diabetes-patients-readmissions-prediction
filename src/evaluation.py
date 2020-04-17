@@ -128,7 +128,7 @@ def plot_feature_importance(importance, feature_names, max_num=-1):
     indexes = np.argsort(importance)
     names = []
     feature_importance = []
-    for i in indexes[:max_num]:
+    for i in indexes[-max_num:]:
         names.append(feature_names[i])
         feature_importance.append(importance[i])
 
