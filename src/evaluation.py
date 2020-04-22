@@ -125,12 +125,12 @@ def plot_feature_importance(importance, feature_names, max_num=-1):
     indexes = np.argsort(importance)
     names = []
     feature_importance = []
-    for i in indexes[-max_num:]:
+    for i in indexes:
         names.append(feature_names[i])
         feature_importance.append(importance[i])
 
     plt.figure(figsize=(10, len(feature_names[:max_num]) // 2))
-    plt.barh(names, feature_importance)
+    plt.barh(names[-max_num::], feature_importance[-max_num::])
     plt.yticklabels = names
 
     return names[::-1]
