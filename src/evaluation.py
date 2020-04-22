@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import NearMiss
+from imblearn.under_sampling import RandomUnderSampler
 from sklearn.metrics import accuracy_score, precision_score,\
     recall_score, roc_auc_score, f1_score, classification_report,\
     roc_curve, auc
@@ -10,18 +10,15 @@ from sklearn.metrics import plot_confusion_matrix
 
 def undersample(x, y):
     """
-    Perform undersampling using NearMiss method.
-
-    More details about NearMiss method can be found at imblearn docs:
-    https://imbalanced-learn.readthedocs.io/en/stable/user_guide.html
+    Undersampling by randomly selecting samples from majority class.
 
     :param x: dataframe with attributes for training (independent
         variables).
     :param y: dataframe with label attribute (dependent variable).
     :return: x and y after undersampling performed.
     """
-    nearmiss = NearMiss(version=3)
-    return nearmiss.fit_resample(x, y)
+    rus = RandomUnderSampler(random_state=3)
+    return rus.fit_resample(x, y)
 
 
 def oversample(x, y):
@@ -48,7 +45,7 @@ def compare_models(models, names, x, y):
     """
     max_len = np.max([len(x) for x in names])
     print("      ".ljust(max_len) + "     Accuracy   F1 (micro)  F1 (macro)"
-                                    "  Precission   Recall   AUC ROC")
+                                    "  Precission   Recall    AUC ROC")
     for i, model in enumerate(models):
         y_pred = model.predict(x)
         print(f"{names[i]}" + "".ljust(max_len-len(names[i])) + "   "
