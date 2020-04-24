@@ -113,18 +113,28 @@ def roc_auc(y_pred, y_true, plot=True, label="curve", ax=None):
     return auc_value
 
 
-def plot_feature_importance(importance, feature_names, max_num=-1):
+def plot_feature_importance(
+    importance,
+    feature_names,
+    max_num=-1,
+    reverse_order=False
+):
     """
     Plot features sorted by importance.
 
     :param importance: importance of features.
     :param feature_names: names of features.
     :param max_num: maximal number of features to show.
+    :param reverse_order: whether importances are in reverse order.
     :return: feature names sorted by importance.
     """
     indexes = np.argsort(importance)
     names = []
     feature_importance = []
+
+    if reverse_order:
+        indexes = list(reversed(indexes))
+
     for i in indexes:
         names.append(feature_names[i])
         feature_importance.append(importance[i])
