@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score, precision_score,\
     recall_score, roc_auc_score, f1_score, classification_report,\
     roc_curve, auc
 from sklearn.metrics import plot_confusion_matrix
+from sklearn.model_selection import learning_curve
 
 
 def undersample(x, y):
@@ -144,3 +145,47 @@ def plot_feature_importance(
     plt.yticklabels = names
 
     return names[::-1]
+
+
+def plot_learning_curve(
+        estimator, title, X, y, cv=None, train_sizes=np.linspace(.1, 1.0, 10)
+):
+    """
+    Plot learning curve of classifier.
+
+    Function taken and edited from:
+    https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
+
+    :param estimator: classifier of which learning curve will be drawn.
+    :param title: title of learning curve plot.
+    :param X: training data features.
+    :param y: training data labels.
+    :param cv: cross-validation (estimator or number of folds).
+    :param train_sizes: train splits sizes.
+    :return:
+    """
+    plt.figure()
+    plt.title(title)
+    plt.ylim(0.45, 1.01)
+    plt.xlabel('Number of samples', labelpad=20)
+    plt.ylabel('Score', labelpad=20)
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=-1, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.grid()
+
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label='Train score')
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label='Cross-validation score')
+
+    plt.legend(loc='best')
+    return plt
