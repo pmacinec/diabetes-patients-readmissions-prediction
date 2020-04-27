@@ -176,15 +176,19 @@ class OneHotEncoder(TransformerMixin):
 
     :param columns: (default: None) list of columns to by encoded, 
         if not passed then all columns of dataframe are used.
+    :param exclude_columns: (default: None) list of columns to be skipped
     """
 
-    def __init__(self, columns=None):
+    def __init__(self, columns=None, exclude_columns=None):
         self.columns = columns
+        self.exclude_columns = exclude_columns
         self.categories = {}
 
     def fit(self, df, y=None, **fit_params):
         self.columns = self.columns if self.columns is not None else df.columns
-
+        if self.exclude_columns:
+            self.columns = [x for x in self.columns
+                            if x not in self.exclude_columns]
         for column in self.columns:
             self.categories[column] = set([
                 f'{str(column)}_{str(val)}' for val in df[column].unique()
