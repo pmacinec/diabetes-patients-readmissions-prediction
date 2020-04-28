@@ -176,7 +176,8 @@ class OneHotEncoder(TransformerMixin):
 
     :param columns: (default: None) list of columns to by encoded, 
         if not passed then all columns of dataframe are used.
-    :param exclude_columns: (default: None) list of columns to be skipped
+    :param exclude_columns: (default: None) list of columns to be
+         skipped.
     """
 
     def __init__(self, columns=None, exclude_columns=None):
@@ -229,7 +230,9 @@ class ValueMapper(TransformerMixin):
     :param mapping: dictionary with mapping.
     """
 
-    def __init__(self, mapping={}):
+    def __init__(self, mapping=None):
+        if mapping is None:
+            mapping = {}
         self.mapping = mapping
 
     def fit(self, df, y=None, **fit_params):
@@ -305,16 +308,30 @@ class SmallCategoriesReducer(TransformerMixin):
         small categories.
     :param threshold: (default: 0.05) frequency threshold when small 
         category will be merged into one `other` category.
+    :param exclude_columns: (default: None) list of columns to be
+         skipped.
     """
 
-    def __init__(self, columns=None, threshold=0.05, replace_value='other'):
+    def __init__(
+            self,
+            columns=None,
+            threshold=0.05,
+            replace_value='other',
+            exclude_columns=None
+    ):
         self.columns = columns
         self.replace_value = replace_value
         self.threshold = threshold
+        self.exclude_columns = exclude_columns
         self.mapping = {}
 
     def fit(self, df, y=None, **fit_params):
-        self.columns = self.columns if self.columns is not None else df.columns
+        if self.columns is None:
+            self.columns = df.columns
+        if self.exclude_columns is not None:
+            self.columns = [
+                x for x in self.columns if x not in self.exclude_columns
+            ]
 
         for column in self.columns:
             values = df[column].value_counts(normalize=True)
