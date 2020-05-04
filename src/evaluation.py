@@ -189,3 +189,28 @@ def plot_learning_curve(
 
     plt.legend(loc='best')
     return plt
+
+
+class CombinedModel:
+    """
+    CombinedModel class serve for combining several model to obtain one
+    prediction. Model is selected to prediction with rule defined in ruler.
+
+    :param models: List of models
+    :param ruler: function that return index of model to by used. Parameter
+    of the function is one row from dataframe.
+    """
+    def __init__(self, models, ruler):
+        super().__init__()
+        self.models = models
+        self.ruler = ruler
+
+    def fit(self, X, y=None):
+        return self
+
+    def predict(self, x):
+        pred = np.zeros(x.shape[0])
+        for i, model in enumerate(self.models):
+            idxs = x[x.apply(self.ruler, axis=1) == i].index
+            pred[idxs] = model.predict(x.loc[idxs])
+        return pred
