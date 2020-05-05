@@ -91,7 +91,7 @@ def roc_auc(y_pred_prob, y_true, plot=True, label="curve", ax=None):
     :param ax: optional axis for plot.
     :return: ROC AUC score.
     """
-    fpr, tpr, _ = roc_curve(y_true, y_pred_prob, drop_intermediate=True)
+    fpr, tpr, _ = roc_curve(y_true, y_pred_prob)
     auc_value = auc(fpr, tpr)
 
     if plot:
@@ -206,15 +206,19 @@ class CombinedModel:
         self.models = models
         self.ruler = ruler
 
-    def predict(self, x):
+    def predict(self, x, probabilities=False):
         """
         Make predictions depending on rules.
 
         :param x: test samples to be predicted.
+        :param probabilities: return probabilities instead predictions.
         :return: list of predictions for all test samples.
         """
         pred = np.zeros(x.shape[0])
         for i, model in enumerate(self.models):
             idxs = x[x.apply(self.ruler, axis=1) == i].index
-            pred[idxs] = model.predict(x.loc[idxs])
+            if probabilities:
+                pred[idxs] = model.predict_proba(x.loc[idxs])[:, 1]
+            else:
+                pred[idxs] = model.predict(x.loc[idxs])
         return pred
