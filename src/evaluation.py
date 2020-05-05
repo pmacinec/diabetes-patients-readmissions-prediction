@@ -49,13 +49,14 @@ def compare_models(models, names, x, y):
                                     "  Precission   Recall    AUC ROC")
     for i, model in enumerate(models):
         y_pred = model.predict(x)
+        y_pred_prob = model.predict_proba(x)[:, 1]
         print(f"{names[i]}" + "".ljust(max_len-len(names[i])) + "   "
               f"|   {accuracy_score(y, y_pred):.2f}   "
               f"|   {f1_score(y, y_pred, average='micro'):.2f}    "
               f"|   {f1_score(y, y_pred, average='macro'):.2f}    "
               f"|   {precision_score(y, y_pred):.2f}    "
               f"|   {recall_score(y, y_pred):.2f}   "
-              f"|   {roc_auc_score(y, y_pred):.2f}   |")
+              f"|   {roc_auc_score(y, y_pred_prob):.2f}   |")
 
 
 def evaluate_model(model, x, y):
@@ -67,30 +68,30 @@ def evaluate_model(model, x, y):
     :param y: dataframe with expected labels.
     """
     y_pred = model.predict(x)
+    y_pred_prob = model.predict_proba(x)[:, 1]
 
     fig, axs = plt.subplots(nrows=1, ncols=2,
                             figsize=(12, 4), constrained_layout=True)
     plot_confusion_matrix(
         model, x, y, cmap=plt.cm.Blues, normalize='true', ax=axs[0]
     )
-    roc_auc(y_pred, y, ax=axs[1])
+    roc_auc(y_pred_prob, y, ax=axs[1])
     print(classification_report(y, y_pred))
-    print(f'ROC AUC score: {round(roc_auc_score(y, y_pred), 2)}')
+    print(f'ROC AUC score: {round(roc_auc_score(y, y_pred_prob), 3)}')
 
 
-def roc_auc(y_pred, y_true, plot=True, label="curve", ax=None):
+def roc_auc(y_pred_prob, y_true, plot=True, label="curve", ax=None):
     """
     Draw ROC curve plot.
 
-    :param y_pred: predicted labels.
+    :param y_pred_prob: probabilitie of predicted labels.
     :param y_true: true labels.
     :param plot: if True, ROC curve plot is drawn.
     :param label: label of a plot.
     :param ax: optional axis for plot.
     :return: ROC AUC score.
     """
-    prob = y_pred / y_pred.max()
-    fpr, tpr, _ = roc_curve(y_true, prob, drop_intermediate=True)
+    fpr, tpr, _ = roc_curve(y_true, y_pred_prob, drop_intermediate=True)
     auc_value = auc(fpr, tpr)
 
     if plot:
