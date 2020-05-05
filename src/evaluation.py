@@ -46,7 +46,7 @@ def compare_models(models, names, x, y):
     """
     max_len = np.max([len(x) for x in names])
     print("      ".ljust(max_len) + "     Accuracy   F1 (micro)  F1 (macro)"
-                                    "  Precission   Recall    AUC ROC")
+                                    "  Precision   Recall    AUC ROC")
     for i, model in enumerate(models):
         y_pred = model.predict(x)
         y_pred_prob = model.predict_proba(x)[:, 1]
