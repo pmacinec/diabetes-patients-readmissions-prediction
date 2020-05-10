@@ -149,7 +149,21 @@ In the evaluation phase, we mainly focused on previously defined experiments wit
 
 As undersampling technique we used \emph{Random undersampling} that selects random samples from majority class to equal number of minority class samples. In case of oversampling we chose SMOTE technique that was mostly used in related works. SMOTE draws the line between the closest examples in feature space and generates new sample at a point along that line. With these data balancing techniques, only training set was balanced.
 
-For complex comparison of how is each model performing, we used several evaluation metrics like F1-score, Precision, Recall and AUC ROC score. All of those metrics were calculated considering each class individually except AUC ROC score (that was calculated only considering positive class). We omitted Accuracy score because of highly imbalanced data. Precision, Recall and F1-score offer more realistic look at the model performance on each predicted group, however AUC ROC appears to be the most suitable metric considering mainly (but not only) positive class. Considering that, we have chosen AUC ROC as the main metric for final models comparison.
+For complex comparison of how is each model performing, we used several evaluation metrics like F1-score, Precision, Recall and AUC ROC score. ROC curve consists of true positive rate (TPR or Recall, Sensitivity) and false positive rate (FPR or Fall-out) while positive class prediction probability threshold is varied. Figure \ref{fig:confusion-matrix} shows confusion matrix interpreting true positives, false positives, true negatives and false negatives.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/confusion_matrix.png}
+    \caption{Confusion matrix.}
+    \label{fig:confusion-matrix}
+\end{figure}
+
+\noindent Then, TPR and FPR are defined as follows:
+$$TPR = \frac{TP}{TP + FN}$$
+
+$$FPR = \frac{FP}{FP + TN}$$
+
+All of mentioned metrics were calculated considering each class individually except AUC ROC score (that was calculated only considering positive class). We omitted Accuracy score because of highly imbalanced data. Precision, Recall and F1-score offer more realistic look at the model performance on each predicted group, however AUC ROC appears to be the most suitable metric considering mainly (but not only) positive class. Considering that, we have chosen AUC ROC as the main metric for final models comparison.
 
 \subsection{Experiments results}
 Table \ref{table:preliminary-results} shows the results of first experiments with Random forest, XGboost a MLP models. For each model, hyperparameters have been tuned only manually by intuition in this phase. Each of the models has been trained on three types of the data - original, undersampled and oversampled (with techniques mentioned in \ref{sec:evaluation-methodology}). We have achieved best results with Random forest on original data (with class weight parameter set to \textit{balanced}) and also the same model trained on undersampled data. Very similar results achieved XGBoost trained on original and undersampled data, alongside with MLP trained on all data variants. Results also showed that oversampling using SMOTE is not so much suitable for this data, even though majority of related works are using it. So, based on the results, we assume that the high scores achieved in the related works with SMOTE being used are due to oversampling also test set. We have tried also this setup and were able to achieve so high scores, but we consider this approach as incorrect.
